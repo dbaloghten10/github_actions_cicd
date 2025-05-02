@@ -1,4 +1,4 @@
-name: Login and push image to AWS
+name: Login to AWS and build image
 
 on:
   push:

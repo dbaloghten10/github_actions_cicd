@@ -1,12 +1,16 @@
 name: Push image to AWS
-
-on: [push]
+on:
+  workflow_run:
+    workflows: ["Login to AWS and build image"]
+    branches: [main]
+    types: 
+      - completed
 
 jobs:
-  build:
+  on-success:
     runs-on: ubuntu-latest
     steps:
-        #Build the image
+        #Push the image to AWS ECR
       - name: Push the image to Amazon ECR
         id: push-image
         uses: ./.github/workflows/deploy-to-aws.yml
