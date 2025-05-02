@@ -41,6 +41,10 @@ jobs:
   terraform-deploy:
     runs-on: ubuntu-latest
     steps:
+        #Checkout action clones the repository onto the VM running the workflow
+      - name: Checkout 
+        uses: actions/checkout@v4
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
