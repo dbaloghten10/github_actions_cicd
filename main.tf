@@ -6,8 +6,10 @@ terraform {
     }
   }
 
-  cloud {
-    organization = "tdavid-actions"
+  backend "s3" {
+    bucket = "david-bucket-aws-ten10"
+    key = "terrraform.tfstate"
+    region = "eu-west-2"
   }
 }
 
