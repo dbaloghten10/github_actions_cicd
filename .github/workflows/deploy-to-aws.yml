@@ -38,12 +38,6 @@ jobs:
         run: |
             docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-  deploy:
-    name: Deploy using terraform
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout 
-        uses: actions/checkout@v4#
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
