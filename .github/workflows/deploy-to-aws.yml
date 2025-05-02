@@ -37,4 +37,22 @@ jobs:
         run: |
             docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+  deploy:
+    name: Deploy using terraform
+    runs-on: ubuntu-latest
 
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v4
+      
+      - name: Terraform Init
+        id: terraform-init
+        run: terraform init
+      
+      - name: Terraform Plan
+        id: terraform-plan
+        run: terraform plan
+      
+      - name: Terraform Validate
+        id: terraform-validate
+        run: terraform validate
