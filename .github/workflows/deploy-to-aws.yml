@@ -39,6 +39,7 @@ jobs:
             docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
   terraform-deploy:
+    needs: build
     runs-on: ubuntu-latest
     steps:
         #Checkout action clones the repository onto the VM running the workflow
