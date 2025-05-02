@@ -207,7 +207,7 @@ resource "aws_security_group_rule" "ingress_http_port3000" {
   from_port         = 3000
   to_port           = 3000
   protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
+  source_security_group_id = aws_security_group.tsecgroup.id
   security_group_id = aws_security_group.tsecgroup.id
 }
 
@@ -240,7 +240,7 @@ resource "aws_security_group_rule" "egress_local" {
 
 resource "aws_lb_target_group" "tlb_targroup" {
   name        = "tdavid-lb-tgroup"
-  port        = 80
+  port        = 3000
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = aws_vpc.tvpc.id
