@@ -1,4 +1,4 @@
-name: Login and push image to AWS
+name: Login to AWS and push the build image to ECR with tag:latest
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   build:
+    name: Build Image and push to ECR
     runs-on: ubuntu-latest
     steps:
         #Checkout action clones the repository onto the VM running the workflow
@@ -37,7 +38,7 @@ jobs:
         run: |
             docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-  deploy:
+  terraform:
     name: Deploy using terraform
     runs-on: ubuntu-latest
 
