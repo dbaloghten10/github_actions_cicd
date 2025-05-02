@@ -70,6 +70,21 @@ resource "aws_vpc_endpoint" "s3" {
   }
 }
 
+resource "aws_vpc_endpoint" "cloudwatch_logs" {
+  vpc_id              = aws_vpc.tvpc.id
+  service_name        = "com.amazonaws.eu-west-2.logs"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  
+  security_group_ids  = [aws_security_group.tsecgroup.id]
+  subnet_ids          = [aws_subnet.tprivs.id]
+
+  tags = {
+    Name = "tdavid-ecr-api"
+    Department = "Training = Platform Engineering 1"
+  }
+}
+
 resource "aws_vpc_endpoint_route_table_association" "s3_route_table_association" {
   route_table_id  = aws_route_table.trtpriv.id
   vpc_endpoint_id = aws_vpc_endpoint.s3.id
