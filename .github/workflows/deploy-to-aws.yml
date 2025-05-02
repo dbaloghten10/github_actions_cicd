@@ -6,6 +6,12 @@ on:
       - main
   pull_request:
 
+env:
+  TF_CLOUD_ORGANIZATION: "tdavid-actions"
+  TF_API_TOKEN: "${{ secrets.TF_API_TOKEN }}"
+  TF_WORKSPACE: "github-actions-cicd"
+  CONFIG_DIRECTORY: "./"
+
 jobs:
   build:
     name: Build Image and push to ECR
@@ -38,42 +44,91 @@ jobs:
         run: |
             docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-  terraform-deploy:
+
+  terraform:
+    if: github.repository != 'dbaloghten10/github-actions-cicd'
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      # so GitHub can check out this repo using the default github.token
+      contents: read
+      pull-requests: write
     steps:
         #Checkout action clones the repository onto the VM running the workflow
       - name: Checkout 
         uses: actions/checkout@v4
 
-        #Configure AWS using the username and password provided in GitHub repository
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Upload Configuration
+        uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.0.0
+        id: plan-upload
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
+          workspace: ${{ env.TF_WORKSPACE }}
+          directory: ${{ env.CONFIG_DIRECTORY }}
+          speculative: true
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: Create Plan Run
+        uses: hashicorp/tfc-workflows-github/actions/create-run@v1.0.0
+        id: plan-run
         with:
-          terraform_version: "^1.11.4"
-          terraform_wrapper: false
-      
-      - name: Terraform Init
-        id: terraform-init
-        run: terraform init
-      
-      - name: Terraform Plan
-        id: terraform-plan
-        run: terraform plan -out=tfplan
-      
-      - name: Terraform Validate
-        id: terraform-validate
-        run: terraform validate
+          workspace: ${{ env.TF_WORKSPACE }}
+          configuration_version: ${{ steps.plan-upload.outputs.configuration_version_id }}
+          plan_only: true
 
-      - name: Terraform Apply
-        id: terraform-apply
-        env:
-          TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
-        run: terraform apply -auto-approve tfplan
+      - name: Get Plan Output
+        uses: hashicorp/tfc-workflows-github/actions/plan-output@v1.0.0
+        id: plan-output
+        with:
+          plan: ${{ fromJSON(steps.plan-run.outputs.payload).data.relationships.plan.data.id }}
+
+      - name: Upload Configuration
+        uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.0.0
+        id: apply-upload
+        with:
+            workspace: ${{ env.TF_WORKSPACE }}
+            directory: ${{ env.CONFIG_DIRECTORY }}
+      
+      - name: Create Apply Run
+        uses: hashicorp/tfc-workflows-github/actions/create-run@v1.0.0
+        id: apply-run
+        with:
+          workspace: ${{ env.TF_WORKSPACE }}
+          configuration_version: ${{ steps.apply-upload.outputs.configuration_version_id }}
+    
+      - name: Apply
+        uses: hashicorp/tfc-workflows-github/actions/apply-run@v1.0.0
+        if: fromJSON(steps.apply-run.outputs.payload).data.attributes.actions.IsConfirmable
+        id: apply
+        with:
+          run: ${{ steps.apply-run.outputs.run_id }}
+          comment: "Apply Run from GitHub Actions CI ${{ github.sha }}"
+      #   #Configure AWS using the username and password provided in GitHub repository
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@v1
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: eu-west-2
+
+      # - name: Setup Terraform
+      #   uses: hashicorp/setup-terraform@v3
+      #   with:
+      #     terraform_version: "^1.11.4"
+      #     terraform_wrapper: false
+      
+      # - name: Terraform Init
+      #   id: terraform-init
+      #   run: terraform init
+      
+      # - name: Terraform Plan
+      #   id: terraform-plan
+      #   run: terraform plan -out=tfplan
+      
+      # - name: Terraform Validate
+      #   id: terraform-validate
+      #   run: terraform validate
+
+      # - name: Terraform Apply
+      #   id: terraform-apply
+      #   env:
+      #     TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
+      #   run: terraform apply -auto-approve tfplan

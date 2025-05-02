@@ -5,6 +5,10 @@ terraform {
       version = "~> 5.0"
     }
   }
+
+  cloud {
+    organization = "tdavid-actions"
+  }
 }
 
 provider "aws" {
