@@ -9,7 +9,7 @@ on:
 env:
   TF_CLOUD_ORGANIZATION: "tdavid-actions"
   TF_API_TOKEN: "${{ secrets.TF_API_TOKEN }}"
-  TF_WORKSPACE: "github-actions-cicd"
+  TF_WORKSPACE: "github_actions_cicd"
   CONFIG_DIRECTORY: "./"
 
 jobs:
