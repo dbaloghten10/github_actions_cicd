@@ -80,7 +80,7 @@ resource "aws_vpc_endpoint" "cloudwatch_logs" {
   subnet_ids          = [aws_subnet.tprivs.id]
 
   tags = {
-    Name = "tdavid-ecr-api"
+    Name = "tdavid-cloudwatch"
     Department = "Training = Platform Engineering 1"
   }
 }
@@ -318,8 +318,8 @@ resource "aws_ecs_task_definition" "task_def" {
       portMappings = [
         {
           name          = "private-instance-80-tcp"
-          containerPort = 80
-          hostPort      = 80
+          containerPort = 3000
+          hostPort      = 3000
           protocol      = "tcp"
           appProtocol   = "http"
         }
