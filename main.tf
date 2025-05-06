@@ -318,7 +318,7 @@ resource "aws_ecs_task_definition" "task_def" {
       portMappings = [
         {
           name          = "private-instance-80-tcp"
-          containerPort = 3000
+          containerPort = 80
           hostPort      = 3000
           protocol      = "tcp"
           appProtocol   = "http"
