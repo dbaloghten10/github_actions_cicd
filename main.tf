@@ -319,7 +319,7 @@ resource "aws_ecs_task_definition" "task_def" {
         {
           name          = "private-instance-80-tcp"
           containerPort = 80
-          hostPort      = 3000
+          hostPort      = 80
           protocol      = "tcp"
           appProtocol   = "http"
         }
