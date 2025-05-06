@@ -318,8 +318,8 @@ resource "aws_ecs_task_definition" "task_def" {
       portMappings = [
         {
           name          = "private-instance-80-tcp"
-          containerPort = 80
-          hostPort      = 80
+          containerPort = 3000
+          hostPort      = 3000
           protocol      = "tcp"
           appProtocol   = "http"
         }
@@ -354,7 +354,7 @@ resource "aws_ecs_service" "tservice" {
   load_balancer {
     target_group_arn = aws_lb_target_group.tlb_targroup.arn
     container_name   = "private-instance"
-    container_port   = 80
+    container_port   = 3000
   }
 
   lifecycle {
